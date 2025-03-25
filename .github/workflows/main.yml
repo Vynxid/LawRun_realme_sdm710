@@ -57,9 +57,9 @@ jobs:
           git \
           git-lfs
         # Set up custom Clang
-        aria2c -j$(nproc --all) $(curl -fsSL https://github.com/ZyCromerZ/Clang/raw/main/Clang-main-link.txt)
-        mkdir zyc-clang
-        tar -xzvf Clang-*.tar.gz -C zyc-clang >> /dev/null
+        # aria2c -j$(nproc --all) $(curl -fsSL https://github.com/ZyCromerZ/Clang/raw/main/Clang-main-link.txt)
+        # mkdir zyc-clang
+        # tar -xzvf Clang-*.tar.gz -C zyc-clang >> /dev/null
         #mem module
         curl -LSs "https://raw.githubusercontent.com/Poko-Apps/MemKernel/main/kernel/setup.sh" | bash -s M anrwt
         # Clone AnyKernel3
@@ -74,9 +74,10 @@ jobs:
         echo "TIME=$(TZ=UTC+3 date +%s)" >> $GITHUB_OUTPUT
     - name: Build Kernel
       run: |
-        export PATH=$(pwd)/zyc-clang/bin/:$PATH
-        make $KERNEL_CMDLINE $KERNEL_DEFCONFIG CC="ccache clang" LD=ld.lld
-        make $KERNEL_CMDLINE CC="ccache clang" LD=ld.lld -j$(nproc --all)
+        # Remove the custom Clang setup and use the system gcc
+        export PATH=/usr/bin:$PATH
+        make $KERNEL_CMDLINE $KERNEL_DEFCONFIG CC="ccache gcc" LD=ld.lld
+        make $KERNEL_CMDLINE CC="ccache gcc" LD=ld.lld -j$(nproc --all)
         cp out/arch/arm64/boot/Image.gz-dtb AnyKernel3
     - name: Upload Kernel
       uses: actions/upload-artifact@v4
